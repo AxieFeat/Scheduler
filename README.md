@@ -1,6 +1,6 @@
 # Scheduler
 
-![JitPack](https://img.shields.io/jitpack/version/com.github.AxieFeat/Scheduler)
+[![](https://jitpack.io/v/AxieFeat/Scheduler.svg)](https://jitpack.io/#AxieFeat/Scheduler)
 
 [English](README.md) | [Русский](README_ru.md)
 
