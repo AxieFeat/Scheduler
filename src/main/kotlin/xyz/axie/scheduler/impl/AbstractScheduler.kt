@@ -1,5 +1,6 @@
 package xyz.axie.scheduler.impl
 
+import xyz.axie.scheduler.ExecutionTime
 import xyz.axie.scheduler.Scheduler
 import xyz.axie.scheduler.SchedulerTask
 import java.util.concurrent.ConcurrentHashMap
@@ -10,6 +11,22 @@ abstract class AbstractScheduler : Scheduler {
     private val tasks = ConcurrentHashMap<Int, SchedulerTask>()
 
     private var tasksWas = AtomicInteger(0)
+
+    override fun execute(
+        delay: ExecutionTime,
+        period: ExecutionTime,
+        task: suspend SchedulerTask.() -> Unit
+    ): SchedulerTask = this.execute(
+        delay.toMillis(),
+        period.toMillis(),
+        task
+    )
+
+    abstract fun execute(
+        delay: Long,
+        period: Long,
+        task: suspend SchedulerTask.() -> Unit
+    ): SchedulerTask
 
     protected fun nextId(): Int {
         return tasksWas.incrementAndGet()

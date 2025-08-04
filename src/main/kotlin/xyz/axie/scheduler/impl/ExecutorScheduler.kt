@@ -1,7 +1,6 @@
 package xyz.axie.scheduler.impl
 
 import kotlinx.coroutines.runBlocking
-import xyz.axie.scheduler.Scheduler
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
@@ -11,7 +10,7 @@ class ExecutorScheduler : AbstractScheduler() {
 
     private val executor = Executors.newScheduledThreadPool(8)
 
-    override fun Scheduler.execute(delay: Long, period: Long, task: suspend SchedulerTask.() -> Unit): SchedulerTask {
+    override fun execute(delay: Long, period: Long, task: suspend SchedulerTask.() -> Unit): SchedulerTask {
         val taskId = nextId()
 
         lateinit var schedulerTask: SchedulerTask

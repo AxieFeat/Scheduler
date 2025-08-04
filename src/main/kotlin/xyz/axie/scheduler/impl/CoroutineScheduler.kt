@@ -5,14 +5,11 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import xyz.axie.scheduler.Scheduler
 import xyz.axie.scheduler.SchedulerTask
 
 class CoroutineScheduler : AbstractScheduler() {
 
-    private val scope = CoroutineScope(Dispatchers.Default)
-
-    override fun Scheduler.execute(delay: Long, period: Long, task: suspend SchedulerTask.() -> Unit): SchedulerTask {
+    override fun execute(delay: Long, period: Long, task: suspend SchedulerTask.() -> Unit): SchedulerTask {
         val taskId = nextId()
 
         lateinit var schedulerTask: SchedulerTask
@@ -91,5 +88,9 @@ class CoroutineScheduler : AbstractScheduler() {
                 scheduler.unregisterTask(id)
             }
         }
+    }
+
+    companion object {
+        private val scope = CoroutineScope(Dispatchers.Default)
     }
 }

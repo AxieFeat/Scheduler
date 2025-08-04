@@ -26,7 +26,11 @@ interface Scheduler {
      *
      * @return Instance of [SchedulerTask].
      */
-    fun Scheduler.execute(delay: Long = 0, period: Long = 0, task: suspend SchedulerTask.() -> Unit): SchedulerTask
+    fun execute(
+        delay: ExecutionTime = ExecutionTime.ZERO,
+        period: ExecutionTime = ExecutionTime.ZERO,
+        task: suspend SchedulerTask.() -> Unit
+    ): SchedulerTask
 
     /**
      * Gets the task by its id.
