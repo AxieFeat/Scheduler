@@ -1,6 +1,7 @@
 package xyz.axie.scheduler
 
 import java.util.concurrent.ScheduledExecutorService
+import kotlin.time.Duration
 
 /**
  * The scheduler interface is used to run tasks in different thread pools.
@@ -27,8 +28,8 @@ interface Scheduler {
      * @return Instance of [SchedulerTask].
      */
     fun execute(
-        delay: ExecutionTime = ExecutionTime.ZERO,
-        period: ExecutionTime = ExecutionTime.ZERO,
+        delay: Duration = Duration.ZERO,
+        period: Duration = Duration.ZERO,
         task: suspend SchedulerTask.() -> Unit
     ): SchedulerTask
 

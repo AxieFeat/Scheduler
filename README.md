@@ -7,7 +7,7 @@
 Its simple library for scheduling tasks on Kotlin via Coroutines and Java executor.
 
 ### Requirements
-- JDK 21 or higher
+- JDK 8 or higher
 - Kotlin
 
 ### Setup
@@ -44,28 +44,16 @@ fun main() {
 
         execute { /* Your code here */ } // This function will immediately execute your code.
 
-        execute(delay = 1.s()) { /* Your code here */ } // This function will execute your task after 1 second.
+        execute(delay = 1.seconds) { /* Your code here */ } // This function will execute your task after 1 second.
 
         // This function will execute your task after 1.5 seconds and then repeat it every hour.
-        execute(delay = 1500.ms(), period = 1.h()) { /* Your code here */ }
+        execute(delay = 1500.milliseconds, period = 1.hours) { /* Your code here */ }
 
-        // How you can see here used .ms, .h, .s functions for setting a time - here list of all this functions.
-        // .ns() -> Nanoseconds
-        // .us() -> Microseconds
-        // .ms() -> Milliseconds
-        // .s() -> Seconds
-        // .m() -> Minutes
-        // .h() -> Hours
-        // .d() -> Days
-        // All of this functions are extension for Number class.
-
-
-        val task = execute {} // You can write the task in variable and, in example, cancel it.
-
+        val task = execute {} // You can write the task in variable and, in example, cancel it in the future.
 
         // Also, while the task is in process of execution, you can cancel it
         var counter = 0
-        execute(period = 1500.ms()) {
+        execute(period = 1500.milliseconds) {
             counter++
             println(counter)
             if(counter >= 10) {

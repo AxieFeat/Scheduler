@@ -1,10 +1,11 @@
 package xyz.axie.scheduler.impl
 
-import xyz.axie.scheduler.ExecutionTime
 import xyz.axie.scheduler.Scheduler
 import xyz.axie.scheduler.SchedulerTask
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
 
 abstract class AbstractScheduler : Scheduler {
 
@@ -13,12 +14,12 @@ abstract class AbstractScheduler : Scheduler {
     private var tasksWas = AtomicInteger(0)
 
     override fun execute(
-        delay: ExecutionTime,
-        period: ExecutionTime,
+        delay: Duration,
+        period: Duration,
         task: suspend SchedulerTask.() -> Unit
     ): SchedulerTask = this.execute(
-        delay.toMillis(),
-        period.toMillis(),
+        delay.toLong(DurationUnit.MILLISECONDS),
+        period.toLong(DurationUnit.MILLISECONDS),
         task
     )
 
