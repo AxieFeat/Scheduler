@@ -18,6 +18,11 @@ interface SchedulerTask {
     val scheduler: Scheduler
 
     /**
+     * Is task has been cancelled.
+     */
+    val cancelled: Boolean
+
+    /**
      * Cancels the task.
      *
      * If the task has already been cancelled, the method does nothing.
@@ -25,9 +30,4 @@ interface SchedulerTask {
      * @see [cancelled]
      */
     fun cancel()
-
-    /**
-     * Is task has been cancelled.
-     */
-    val cancelled: Boolean
 }

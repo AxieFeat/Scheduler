@@ -21,8 +21,8 @@ interface Scheduler {
     /**
      * Starts a task with a specified parameters.
      *
-     * @param delay Delay for executing a task. `0` - Without delay.
-     * @param period Period for a repeating task. `0` - Without repeating.
+     * @param delay Delay for executing a task. [Duration.ZERO] - Without delay.
+     * @param period Period for a repeating task. [Duration.ZERO] - Without repeating.
      * @param task Task to execute.
      *
      * @return Instance of [SchedulerTask].

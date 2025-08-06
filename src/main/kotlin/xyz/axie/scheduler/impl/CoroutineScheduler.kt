@@ -6,18 +6,39 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import xyz.axie.scheduler.SchedulerTask
+import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration
 
-class CoroutineScheduler : AbstractScheduler() {
+/**
+ * Creates a [CoroutineScheduler] with a [SupervisorJob] in the provided [CoroutineContext].
+ *
+ * @param context The [CoroutineContext] to be used for the [CoroutineScope].
+ *
+ * @return A new instance of [CoroutineScheduler].
+ */
+inline fun coroutineSupervisor(context: CoroutineContext): CoroutineScheduler =
+    CoroutineScheduler(CoroutineScope(context + SupervisorJob() + CoroutineName("CoroutineScheduler")))
 
-    override fun execute(delay: Long, period: Long, task: suspend SchedulerTask.() -> Unit): SchedulerTask {
+/**
+ * A [CoroutineScheduler] using the [GlobalScope].
+ * This should be used with caution as tasks in the GlobalScope are not bound to any specific lifecycle.
+ */
+@DelicateCoroutinesApi
+inline fun coroutineGlobal(): CoroutineScheduler = CoroutineScheduler(GlobalScope)
+
+class CoroutineScheduler(
+    private val scope: CoroutineScope
+) : AbstractScheduler(), CoroutineScope by scope {
+
+    override fun execute(delay: Duration, period: Duration, task: suspend SchedulerTask.() -> Unit): SchedulerTask {
         val taskId = nextId()
 
         lateinit var schedulerTask: SchedulerTask
 
         val job = when {
-            period > 0L -> {
+            period > Duration.ZERO -> {
                 flow {
-                    if (delay > 0L) delay(delay)
+                    if (delay > Duration.ZERO) delay(delay)
                     emit(Unit)
                     while (true) {
                         delay(period)
@@ -37,7 +58,7 @@ class CoroutineScheduler : AbstractScheduler() {
                     .launchIn(scope)
             }
 
-            delay > 0L -> {
+            delay > Duration.ZERO -> {
                 scope.launch {
                     delay(delay)
                     try {
@@ -88,9 +109,5 @@ class CoroutineScheduler : AbstractScheduler() {
                 scheduler.unregisterTask(id)
             }
         }
-    }
-
-    companion object {
-        private val scope = CoroutineScope(Dispatchers.Default)
     }
 }

@@ -32,12 +32,38 @@ Here's a simple example of using scheduler:
 ```kotlin
 fun main() {
     // This scheduler has two implementations - Coroutines and Java executor.
-    // For creation instances of schedulers exist class BasicSchedulerManager, but recommended .scheduler function
-    scheduler {} // <- Creates scheduler with default implementation (Default is Coroutines)
-    scheduler(SchedulerType.COROUTINES) {} // <- Also creates coroutine scheduler :/
-    scheduler(SchedulerType.EXECUTOR) {} // <- Creates scheduler based on Java executor.
 
-    scheduler { // Note that every call of this function creates a new instance of scheduler with own task counter!
+    // Example of creation coroutine-based scheduler.
+    val coroutineScheduler = CoroutineScheduler(GlobalScope)
+
+    // Example of creation java executor-based scheduler.
+    val executorScheduler = ExecutorScheduler(Executors.newSingleThreadScheduledExecutor())
+
+    // It is very important to understand that each scheduler instance is independent and has its own task counter.
+
+    // There are functions for faster creation:
+    // .coroutineSupervisor, .coroutineGlobal - For coroutine-based scheduler.
+    // .executorThreadPool, .executorSingleThread - For java executor-based scheduler.
+
+    val anotherCoroutineScheduler = coroutineGlobal() // Equals `CoroutineScheduler(GlobalScope)`
+    val anotherExecutorScheduler = executorSingleThread() // Equals `ExecutorScheduler(Executors.newSingleThreadScheduledExecutor())`
+
+    // Then you can call .execute functions:
+    anotherCoroutineScheduler.execute {}
+    anotherExecutorScheduler.apply {
+        this.execute {}
+    }
+
+    // But also exist .scheduler function, it simply calls .apply on the object.
+    scheduler(coroutineGlobal()) {
+        execute {}
+    }
+    scheduler(anotherExecutorScheduler) {
+        execute {}
+    }
+
+    // Something about .execute function
+    scheduler(executorThreadPool(2)) {
 
         // For execution tasks in scheduler exist function execute, that returns instance of SchedulerTask.
 
@@ -61,12 +87,5 @@ fun main() {
             }
         }
     }
-
-    // For the reason described above, it is highly recommended
-    // to create an instance and store it in a variable for later reuse.
-    val someScheduler = scheduler {}
-
-    // Then you can execute tasks via this scheduler.
-    someScheduler.execute {}
 }
 ```

@@ -31,13 +31,39 @@ dependencies {
 
 ```kotlin
 fun main() {
-    // У этого шедулера есть две реализации - Coroutines и Java executor.
-    // Для создания экземпляров шедулера существует класс BasicSchedulerManager, но рекомендуется использование функции .scheduler
-    scheduler {} // <- Создаёт шедулер со стандартной реализации (Стандартная - это Coroutines)
-    scheduler(SchedulerType.COROUTINES) {} // <- Так же создаст шедулер на Coroutines :/
-    scheduler(SchedulerType.EXECUTOR) {} // <- Создаст шедулер на основе Java executor.
+    // У этого планировщика есть две реализации - Coroutines и Java executor.
 
-    scheduler { // Обратите внимание, что каждый вызов этой функции создаёт новый экземпляр шедулера со своим счетчиком задач!
+    // Пример создания планировщика на основе корутин.
+    val coroutineScheduler = CoroutineScheduler(GlobalScope)
+
+    // Пример создания планировщика на основе Java executor.
+    val executorScheduler = ExecutorScheduler(Executors.newSingleThreadScheduledExecutor())
+
+    // Так же очень важно понимать, что каждая инстанса планировщика независима и имеет свой личный счётчик задач.
+
+    // Существуют функции для быстрого создания планировщиков:
+    // .coroutineSupervisor, .coroutineGlobal - Для планировщика на корутинах.
+    // .executorThreadPool, .executorSingleThread - Для планировщика на Java executor.
+
+    val anotherCoroutineScheduler = coroutineGlobal() // Эквивалент `CoroutineScheduler(GlobalScope)`
+    val anotherExecutorScheduler = executorSingleThread() // Эквивалент `ExecutorScheduler(Executors.newSingleThreadScheduledExecutor())`
+
+    // Затем вы можете вызывать функцию .execute:
+    anotherCoroutineScheduler.execute {}
+    anotherExecutorScheduler.apply {
+        this.execute {}
+    }
+
+    // Но так же существует функция .scheduler, она просто вызывает функция .apply на объекте.
+    scheduler(coroutineGlobal()) {
+        execute {}
+    }
+    scheduler(anotherExecutorScheduler) {
+        execute {}
+    }
+
+    // Немного о функции .execute
+    scheduler(executorThreadPool(2)) {
 
         // Для выполнения задач существует функция execute, которая возвращает экземпляр SchedulerTask.
 
@@ -61,12 +87,5 @@ fun main() {
             }
         }
     }
-
-    // По причине, описанной выше, очень рекомендуется
-    // создавать экземпляр шедулера и сохранять его в переменную для последующего использования.
-    val someScheduler = scheduler {}
-
-    // Затем вы можете выполнять задачи с помощью этого шедулера
-    someScheduler.execute {}
 }
 ```

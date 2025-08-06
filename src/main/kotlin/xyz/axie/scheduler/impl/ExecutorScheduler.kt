@@ -5,12 +5,44 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import xyz.axie.scheduler.SchedulerTask
+import java.util.concurrent.ScheduledExecutorService
+import kotlin.time.Duration
 
-class ExecutorScheduler : AbstractScheduler() {
+/**
+ * Creates an [ExecutorScheduler] with a thread pool of the specified size.
+ *
+ * @param threadCount The number of threads in the pool.
+ *
+ * @return A new instance of [ExecutorScheduler].
+ */
+inline fun executorThreadPool(threadCount: Int): ExecutorScheduler = ExecutorScheduler(threadCount)
 
-    private val executor = Executors.newScheduledThreadPool(8)
+/**
+ * Creates an [ExecutorScheduler] with a single-threaded executor.
+ *
+ * @return A new instance of [ExecutorScheduler].
+ */
+inline fun executorSingleThread(): ExecutorScheduler = ExecutorScheduler()
 
-    override fun execute(delay: Long, period: Long, task: suspend SchedulerTask.() -> Unit): SchedulerTask {
+class ExecutorScheduler(
+    private val executor: ScheduledExecutorService
+) : AbstractScheduler() {
+
+    constructor(threadCount: Int) : this(Executors.newScheduledThreadPool(threadCount))
+
+    constructor() : this(Executors.newSingleThreadScheduledExecutor())
+
+    override fun execute(
+        delay: Duration,
+        period: Duration,
+        task: suspend SchedulerTask.() -> Unit
+    ): SchedulerTask = this.execute(
+        delay.inWholeNanoseconds,
+        period.inWholeNanoseconds,
+        task
+    )
+
+    fun execute(delay: Long, period: Long, task: suspend SchedulerTask.() -> Unit): SchedulerTask {
         val taskId = nextId()
 
         lateinit var schedulerTask: SchedulerTask
@@ -31,10 +63,10 @@ class ExecutorScheduler : AbstractScheduler() {
 
         val future = when {
             period > 0L -> {
-                executor.scheduleAtFixedRate(wrapped, delay, period, TimeUnit.MILLISECONDS)
+                executor.scheduleAtFixedRate(wrapped, delay, period, TimeUnit.NANOSECONDS)
             }
             delay > 0L -> {
-                executor.schedule(wrapped, delay, TimeUnit.MILLISECONDS)
+                executor.schedule(wrapped, delay, TimeUnit.NANOSECONDS)
             }
             else -> {
                 executor.submit(wrapped)
